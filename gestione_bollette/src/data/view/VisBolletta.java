@@ -5,22 +5,22 @@ import java.awt.BorderLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+import controller.DAO;
 import data.model.Bolletta;
 import data.model.Tipologia;
-
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
@@ -39,9 +39,9 @@ public class VisBolletta extends JInternalFrame {
 	private JComboBox<Tipologia> comboTipologia;
 	private JComboBox<String> combo_anno;
 
-	public VisBolletta(ArrayList<Bolletta> bolletteList, ArrayList<Tipologia> tipologieList) {
-		this.bolletteList = bolletteList;
-		this.tipologieList = tipologieList;
+	public VisBolletta(ArrayList<Bolletta> bollette, ArrayList<Tipologia> tipologie) {
+		bolletteList = new ArrayList<Bolletta>(bollette);
+		tipologieList = new ArrayList<Tipologia>(tipologie);
 		setResizable(true);
 		setTitle("Visualizzazione bollette");
 		setClosable(true);
@@ -59,6 +59,8 @@ public class VisBolletta extends JInternalFrame {
 		modello.addColumn("Data Emissione");
 		modello.addColumn("Data Scadenza");
 		modello.addColumn("Data Pagamento");
+		modello.addColumn("Key");
+		table.removeColumn(table.getColumn("Key"));
 		scrollPane.setViewportView(table);
 
 		JPanel panel = new JPanel();
@@ -76,7 +78,6 @@ public class VisBolletta extends JInternalFrame {
 		panel.add(lbl_tipologia);
 
 		comboTipologia = new JComboBox<Tipologia>();
-
 		comboTipologia.addItem(new Tipologia("TUTTE"));
 		tipologieList.forEach(t -> comboTipologia.addItem(t));
 
@@ -86,7 +87,6 @@ public class VisBolletta extends JInternalFrame {
 		panel.add(lblData);
 
 		combo_anno = new JComboBox<String>();
-
 		combo_anno.addItem("TUTTI");
 		bolletteList.stream().map(bolletta -> bolletta.getDataEmissione().getYear() + "").distinct()
 				.forEach(anno -> combo_anno.addItem(anno));
@@ -96,7 +96,6 @@ public class VisBolletta extends JInternalFrame {
 		panel.add(lbl_selezionePagate);
 
 		combo_stato = new JComboBox<String>();
-
 		combo_stato.addItem("TUTTE");
 		combo_stato.addItem("PAGATE");
 		combo_stato.addItem("NON PAGATE");
@@ -127,11 +126,32 @@ public class VisBolletta extends JInternalFrame {
 			}
 		});
 
-		showAll();
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (table.getValueAt(table.getSelectedRow(), 6).equals("DA PAGARE")) {
+					int scelta = JOptionPane.showConfirmDialog(VisBolletta.this,
+							"Vuoi pagare la bolletta selezionata?");
+					if (scelta == JOptionPane.YES_OPTION) {
+						Bolletta b = DAO.getBolletta(
+								Long.parseLong((String) table.getModel().getValueAt(table.getSelectedRow(), 7)));
+						BolletteView.openPagamentoBolletta(new PagamentoBolletta(b, VisBolletta.this));
+					}
+				}
 
+			}
+
+		});
+
+		showAll();
 	}
 
-	private void showAll() {
+	public void refresh() {
+		bolletteList = DAO.getBollette();
+		showAll();
+	}
+
+	public void showAll() {
 		azzeraTabella();
 		bolletteList.stream().sorted((b1, b2) -> {
 			if (b1.getDataPagamento() == null)

@@ -11,7 +11,7 @@ import data.model.Bolletta;
 import data.model.Tipologia;
 
 public class DAO {
-	private static final String url = "jdbc:sqlite:databaseBollette.db";
+	private static final String url = "jdbc:sqlite:db_bollette.db";
 
 	private static Connection getConnection() {
 		try {
@@ -87,5 +87,51 @@ public class DAO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void addTipologia(Tipologia t) {
+		try (Connection connessione = getConnection()) {
+			PreparedStatement ps = connessione.prepareStatement("INSERT INTO tipologie (nomeTipologia) values (?)");
+			ps.setString(1, t.getNomeTipologia());
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static ArrayList<Bolletta> getUnpaidBollette() {
+		ArrayList<Bolletta> out = new ArrayList<Bolletta>();
+		ArrayList<Tipologia> tipologieList = getTipologie();
+		try (Connection connessione = getConnection()) {
+			PreparedStatement ps = connessione.prepareStatement("Select * FROM bollette WHERE dataPagamento IS NULL");
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				int numero = rs.getInt("tipologia");
+				out.add(new Bolletta(rs.getLong("key"), rs.getString("commento"), rs.getString("indirizzo"),
+						tipologieList.stream().filter(tipo -> tipo.getKey() == numero).findFirst().get(),
+						rs.getDouble("cifra"), LocalDate.parse(rs.getDate("dataEmissione").toString()),
+						LocalDate.parse(rs.getDate("dataScadenza").toString()), null));
+			}
+			return out;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void addPagamentoBolletta(Bolletta bolletta, LocalDate data) {
+		long key = bolletta.getKey();
+		try (Connection connessione = getConnection()) {
+			PreparedStatement ps = connessione.prepareStatement("UPDATE bollette SET dataPagamento=? WHERE key=? ");
+			ps.setString(1, data.toString());
+			ps.setLong(2, key);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Bolletta getBolletta(long key) {
+		return getBollette().stream().filter(bolletta -> bolletta.getKey() == key).findAny().get();
 	}
 }

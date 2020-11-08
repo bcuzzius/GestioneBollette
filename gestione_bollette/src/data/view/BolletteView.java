@@ -18,6 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JDesktopPane;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import java.awt.Toolkit;
@@ -53,8 +54,9 @@ public class BolletteView extends JFrame {
 	 * Create the frame.
 	 */
 	public BolletteView() {
-		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\dpasc\\OneDrive\\Desktop\\Programming\\JAVA\\Daniela\\gestione_bollette\\lib\\icon.png"));
-		setTitle("Gestione Bollete by DomPascal");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(
+				"C:\\Users\\dpasc\\OneDrive\\Desktop\\Programming\\JAVA\\Daniela\\gestione_bollette\\lib\\icon.png"));
+		setTitle("Gestione Bollette by DomPascal");
 		aggiornaListeDatabase();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(200, 200, 800, 400);
@@ -65,13 +67,22 @@ public class BolletteView extends JFrame {
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
 
+		JMenu mnBolletta = new JMenu("Bolletta");
+		mnFile.add(mnBolletta);
+
 		JMenuItem menuItem_inserimento = new JMenuItem("Inserimento");
 
-		mnFile.add(menuItem_inserimento);
+		mnBolletta.add(menuItem_inserimento);
 
 		JMenuItem menuItem_visualizzazione = new JMenuItem("Visualizzazione");
+		mnBolletta.add(menuItem_visualizzazione);
 
-		mnFile.add(menuItem_visualizzazione);
+		JMenu mnTipologia = new JMenu("Tipologia");
+		mnFile.add(mnTipologia);
+
+		JMenuItem menuItemInserimentoTipologia = new JMenuItem("Inserimento");
+
+		mnTipologia.add(menuItemInserimentoTipologia);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -81,17 +92,23 @@ public class BolletteView extends JFrame {
 		contentPane.add(desktopPane);
 		desktopPane.setLayout(new BorderLayout(0, 0));
 
+		menuItemInserimentoTipologia.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				addDesktop(new InsTipologia());
+			}
+		});
 		menuItem_inserimento.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addDesktop(new InsBolletta(tipologieList));
 			}
 		});
-
 		menuItem_visualizzazione.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				addDesktop(new VisBolletta(bolletteList, tipologieList));
 			}
 		});
+
 	}
 
 	public static void aggiornaListeDatabase() {
@@ -99,22 +116,37 @@ public class BolletteView extends JFrame {
 		tipologieList = new ArrayList<Tipologia>(DAO.getTipologie());
 	}
 
-	public void addDesktop(JInternalFrame jframe) {
-		desktopPane.removeAll();
-		((BasicInternalFrameUI) jframe.getUI()).setNorthPane(null);
-		jframe.setBorder(null);
-		jframe.setVisible(true);
-		try {
-			jframe.setMaximum(true);
-		} catch (PropertyVetoException e) {
-
-		}
-		desktopPane.add(jframe);
-	}
-
 	public static void aggiungiBolletta(Bolletta newBolletta) {
 		DAO.addBolletta(newBolletta);
 		aggiornaListeDatabase();
+	}
+
+	public static void aggiungiTipologia(Tipologia t) {
+		DAO.addTipologia(t);
+		aggiornaListeDatabase();
+	}
+
+	public static void pagaBolletta(Bolletta bolletta, LocalDate data) {
+		DAO.addPagamentoBolletta(bolletta, data);
+		aggiornaListeDatabase();
+	}
+
+	private void addDesktop(JInternalFrame jInternalFrame) {
+		if (desktopPane.getSelectedFrame() != null)
+			desktopPane.getSelectedFrame().dispose();
+		((BasicInternalFrameUI) jInternalFrame.getUI()).setNorthPane(null);
+		try {
+			jInternalFrame.setMaximum(true);
+		} catch (PropertyVetoException e) {
+			e.printStackTrace();
+		}
+		jInternalFrame.setBorder(null);
+		jInternalFrame.setVisible(true);
+		desktopPane.add(jInternalFrame);
+	}
+
+	public static void openPagamentoBolletta(JFrame jframe) {
+		jframe.setVisible(true);
 	}
 
 }

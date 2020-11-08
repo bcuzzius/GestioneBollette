@@ -208,19 +208,22 @@ public class InsBolletta extends JInternalFrame {
 		btn_reset.setBackground(new Color(204, 102, 102));
 		btn_reset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				txtCommento.setText("");
-				txtIndirizzo.setText("");
-				txtCifra.setText("");
-				ggEmissione.setText("");
-				mmEmissione.setText("");
-				aaEmissione.setText("");
-				ggPagamento.setText("");
-				mmPagamento.setText("");
-				aaPagamento.setText("");
-				ggScadenza.setText("");
-				mmScadenza.setText("");
-				aaScadenza.setText("");
-				txtCommento.requestFocus();
+				int scelta = JOptionPane.showConfirmDialog(InsBolletta.this, "Vuoi resettare tutti i campi?");
+				if (scelta == JOptionPane.YES_OPTION) {
+					txtCommento.setText("");
+					txtIndirizzo.setText("");
+					txtCifra.setText("");
+					ggEmissione.setText("");
+					mmEmissione.setText("");
+					aaEmissione.setText("");
+					ggPagamento.setText("");
+					mmPagamento.setText("");
+					aaPagamento.setText("");
+					ggScadenza.setText("");
+					mmScadenza.setText("");
+					aaScadenza.setText("");
+					txtCommento.requestFocus();
+				}
 			}
 		});
 		panel_5.add(btn_reset);

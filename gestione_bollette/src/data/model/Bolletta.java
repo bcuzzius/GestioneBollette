@@ -28,10 +28,21 @@ public class Bolletta {
 		this.dataPagamento = dataPagamento;
 	}
 
-	public Bolletta() {}
-	
-	
-	
+	public Bolletta(long key, String commento, String indirizzo, Tipologia tipologia, double cifra,
+			LocalDate dataEmissione, LocalDate dataScadenza, LocalDate dataPagamento) {
+		this.key = key;
+		this.commento = commento;
+		this.indirizzo = indirizzo;
+		this.tipologia = tipologia;
+		this.cifra = cifra;
+		this.dataEmissione = dataEmissione;
+		this.dataScadenza = dataScadenza;
+		this.dataPagamento = dataPagamento;
+	}
+
+	public Bolletta() {
+	}
+
 	public long getKey() {
 		return key;
 	}
@@ -109,11 +120,19 @@ public class Bolletta {
 			return new String[] { commento, indirizzo, tipologia.toString(), cifra + "",
 					dataEmissione.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY)),
 					dataScadenza.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY)),
-					dataPagamento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY)) };
+					dataPagamento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY)), key + "" };
 		else {
 			return new String[] { commento, indirizzo, tipologia.toString(), cifra + "",
 					dataEmissione.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY)),
-					dataScadenza.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY)), "DA PAGARE" };
+					dataScadenza.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY)), "DA PAGARE",
+					key + "" };
 		}
 	}
+
+	@Override
+	public String toString() {
+		return commento + " - " + indirizzo + " - " + tipologia.getNomeTipologia() + " - "
+				+ dataEmissione.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY));
+	}
+
 }
